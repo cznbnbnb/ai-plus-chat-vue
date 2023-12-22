@@ -34,22 +34,22 @@ export default {
             email: this.loginForm.username,
             code: this.loginForm.password
           })
-          .then(response => {
-            if (response.data.code === 1) {
-              // 登录成功
-              console.log('登录成功', response.data);
-              // 保存token
-              localStorage.setItem('token', response.data.map.token);
-              // 跳转到首页
-              this.$router.push('/home/chat');
-            } else {
-              // 登录失败
-              console.log('登录失败', response.data.msg);
-            }
-          })
-          .catch(error => {
-            console.error('请求失败:', error);
-          });
+            .then(response => {
+              if (response.data.code === 1) {
+                // 登录成功
+                console.log('登录成功', response.data);
+                // 保存token
+                localStorage.setItem('token', response.data.map.token);
+                // 跳转到首页
+                this.$router.push('/home/chat');
+              } else {
+                // 登录失败
+                console.log('登录失败', response.data.msg);
+              }
+            })
+            .catch(error => {
+              console.error('请求失败:', error);
+            });
         } else {
           console.log("验证失败!");
         }
