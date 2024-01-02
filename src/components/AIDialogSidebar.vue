@@ -7,7 +7,7 @@
     class="ai-drawer"
   >
     <div class="ai-header">
-      <img src="@/assets/doge.png" alt="AI头像" class="ai-avatar">
+      <img src="@/assets/doge.png" alt="AI头像" class="ai-avatar" />
       <h3>AI助手</h3>
     </div>
 
@@ -17,7 +17,6 @@
         <p v-if="aiResponse" class="message-ai">{{ aiResponse }}</p>
         <!-- 用户消息 -->
         <p v-if="userMessage" class="message-user">{{ userMessage }}</p>
-        
       </div>
 
       <div class="input-area">
@@ -29,15 +28,15 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
     return {
       drawerVisible: false,
-      userMessage: '',
-      aiResponse: '',
-      inputText: '',
+      userMessage: "",
+      aiResponse: "",
+      inputText: "",
       failedAttempts: 0, // 添加失败尝试计数器
       pollInterval: null,
     };
@@ -45,45 +44,47 @@ export default {
   methods: {
     sendMessage() {
       const message = this.inputText;
-      this.inputText = ''; // 清空输入框
-      this.aiResponse = ''; // 重置AI回应
+      this.inputText = ""; // 清空输入框
+      this.aiResponse = ""; // 重置AI回应
       this.userMessage = message; // 显示用户消息
-      axios.post('/ai/sendMessage', {  message: message })
-        .then(response => {
-          console.log('发送成功:', response.data);
+      axios
+        .post("/ai/sendMessage", { message: message })
+        .then((response) => {
+          console.log("发送成功:", response.data);
           this.pollAnswer(); // 开始轮询获取AI回复
         })
-        .catch(error => {
-          console.error('发送失败:', error);
+        .catch((error) => {
+          console.error("发送失败:", error);
           return;
         });
     },
     pollAnswer() {
       const poll = () => {
-        axios.post('/ai/getAnswer')
-          .then(response => {
+        axios
+          .post("/ai/getAnswer")
+          .then((response) => {
             if (response.data.code === 1) {
               this.failedAttempts = 0; // 重置失败尝试计数器
               this.aiResponse = response.data.data.answer;
-              console.log('AI状态:', response.data.data.state);
+              console.log("AI状态:", response.data.data.state);
               if (response.data.data.state === 2) {
                 this.aiResponse = response.data.data.answer;
-                console.log('AI回复完毕:');
+                console.log("AI回复完毕:");
                 // AI回复完毕后停止轮询
                 clearInterval(this.pollInterval);
               }
-            }else {
+            } else {
               // 失败尝试计数器加1
               this.failedAttempts += 1;
               if (this.failedAttempts > 5) {
                 // 失败尝试次数超过5次后停止轮询
-                console.error('获取回复失败次数过多，停止轮询');
+                console.error("获取回复失败次数过多，停止轮询");
                 clearInterval(this.pollInterval);
               }
             }
           })
-          .catch(error => {
-            console.error('获取回复失败:', error);
+          .catch((error) => {
+            console.error("获取回复失败:", error);
             clearInterval(this.pollInterval);
           });
       };
@@ -92,7 +93,7 @@ export default {
   },
   beforeUnmount() {
     clearInterval(this.pollInterval);
-  }
+  },
 };
 </script>
 

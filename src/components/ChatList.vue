@@ -1,31 +1,32 @@
 <template>
   <div class="chat-list-container">
     <div class="chat-list">
-    <el-list v-if="friends.length">
-      <el-list-item v-for="friend in friends" :key="friend.userId" @click="selectFriend()">
-        <el-avatar :src="friend.avatar"></el-avatar>
-        <div class="friend-info">
-          <h4>{{ friend.name }}</h4>
-          <p>{{ friend.remark }}</p>
-        </div>
-      </el-list-item>
-    </el-list>
-    <div v-else class="no-friends">
-      暂无已交流的好友，快去与好友聊天吧
+      <el-list v-if="friends.length">
+        <el-list-item
+          v-for="friend in friends"
+          :key="friend.userId"
+          @click="selectFriend()"
+        >
+          <el-avatar :src="friend.avatar"></el-avatar>
+          <div class="friend-info">
+            <h4>{{ friend.name }}</h4>
+            <p>{{ friend.remark }}</p>
+          </div>
+        </el-list-item>
+      </el-list>
+      <div v-else class="no-friends">暂无已交流的好友，快去与好友聊天吧</div>
     </div>
   </div>
-  </div>
-  
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-  name: 'ChatList',
+  name: "ChatList",
   data() {
     return {
-      friends: []
+      friends: [],
     };
   },
   mounted() {
@@ -33,23 +34,30 @@ export default {
   },
   methods: {
     getFriendList() {
-      axios.get('/getFriendList', { withCredentials: true })
-        .then(response => {
-          this.friends = response.data.data;
+      axios
+        .get("user/getFriendList", { withCredentials: true })
+        .then((response) => {
+          if (response.data && Array.isArray(response.data.data)) {
+            this.friends = response.data.data;
+          } else {
+            // 如果响应不是预期格式，保持 friends 为初始的空数组或设置为其他默认值
+            this.friends = []; // 或其他默认值，如 [{}] 或 [默认好友对象]
+          }
         })
-        .catch(error => {
-          console.error('获取好友列表失败:', error);
+        .catch((error) => {
+          console.error("获取好友列表失败:", error);
+          this.friends = []; // 发生错误时，设置为初始的空数组或其他默认值
         });
     },
+
     selectFriend() {
       // 处理选中好友的逻辑
-    }
-  }
+    },
+  },
 };
 </script>
-  
-<style scoped>
 
+<style scoped>
 .chat-list-container {
   border: 1px solid #d3d3d3; /* 灰色边框 */
   border-radius: 5px; /* 圆角边框 */
@@ -86,5 +94,5 @@ export default {
   text-align: center;
   color: #999;
   padding: 20px;
-}</style>
-  
+}
+</style>

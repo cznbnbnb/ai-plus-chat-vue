@@ -17,6 +17,7 @@
 
 <script>
 import axios from 'axios';
+import WebSocketService from '../services/WebSocketService.js';
 export default {
   data() {
     return {
@@ -38,8 +39,10 @@ export default {
               if (response.data.code === 1) {
                 // 登录成功
                 console.log('登录成功', response.data);
+                this.$store.dispatch('setCurrentUser', response.data.data); // 使用后端返回的用户信息更新 Vuex store
                 // 保存token
                 localStorage.setItem('token', response.data.map.token);
+                WebSocketService.connect('ws://localhost:8080/ws'); // 连接 WebSocket 服务
                 // 跳转到首页
                 this.$router.push('/home/chat');
               } else {

@@ -1,24 +1,41 @@
 <template>
   <div class="text-input">
-    <input type="text" v-model="message" placeholder="输入消息..." class="input-field"/>
+    <input
+      type="text"
+      v-model="message"
+      placeholder="输入消息..."
+      class="input-field"
+      @keyup.enter="sendMessage"
+    />
     <button @click="sendMessage" class="send-button">发送</button>
   </div>
 </template>
 
 <script>
+import WebSocketService from "@/services/WebSocketService"; // 引入 WebSocket 服务
+
 export default {
   data() {
     return {
-      message: '' // 绑定到输入框的消息文本
+      message: "", // 绑定到输入框的消息文本
     };
   },
   methods: {
     sendMessage() {
-      // 发送消息的逻辑，例如 emit 一个事件
-      this.$emit('message-sent', this.message);
-      this.message = ''; // 发送后清空输入框
-    }
-  }
+      if (this.message.trim() && this.$store.state.currentUser) {
+        const chatMessage = {
+          senderId: this.$store.state.currentUser.id, // 使用 Vuex store 中的当前用户ID
+          receiverId: this.$store.state.currentChat.id, // 当前聊天对象ID
+          content: this.message,
+          type: 0, // 假设 0 表示文本消息
+          // ... 其他字段
+        };
+
+        WebSocketService.send(chatMessage);
+        this.message = ""; // 发送后清空输入框
+      }
+    },
+  },
 };
 </script>
 
