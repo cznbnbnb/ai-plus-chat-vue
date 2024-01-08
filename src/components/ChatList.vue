@@ -5,12 +5,16 @@
         <el-list-item
           v-for="friend in friends"
           :key="friend.userId"
-          @click="selectFriend()"
+          @click="selectFriend(friend)"
         >
-          <el-avatar :src="friend.avatar"></el-avatar>
           <div class="friend-info">
-            <h4>{{ friend.name }}</h4>
-            <p>{{ friend.remark }}</p>
+            <el-avatar :src="getAvatar(friend)"></el-avatar>
+            <div class="info-text">
+              <span class="friend-name">{{
+                friend.remark || friend.name || friend.email
+              }}</span>
+              <span class="last-message">{{ friend.lastMessage }}</span>
+            </div>
           </div>
         </el-list-item>
       </el-list>
@@ -49,9 +53,12 @@ export default {
           this.friends = []; // 发生错误时，设置为初始的空数组或其他默认值
         });
     },
-
-    selectFriend() {
-      // 处理选中好友的逻辑
+    getAvatar(friend) {
+      return friend.avatar || require("@/assets/doge.png");
+    },
+    selectFriend(friend) {
+      console.log("选择好友:", friend);
+      this.$store.dispatch("setCurrentChat", friend);
     },
   },
 };
@@ -76,7 +83,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 10px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #d3d3d3;
   cursor: pointer;
 }
 
@@ -85,14 +92,47 @@ export default {
   /* 悬停时的背景颜色 */
 }
 
-.friend-info {
-  margin-left: 10px;
-  /* 头像和信息之间的间距 */
+.el-avatar {
+  flex-shrink: 0;
+  width: 40px; /* 设置统一的头像大小 */
+  height: 40px; /* 设置统一的头像大小 */
+  border-radius: 50%; /* 圆形头像 */
+  margin-right: 10px;
 }
-
+.friend-info {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  margin-left: 7px;
+  margin-left: 7px;
+  margin-top: 5px;
+  /*增加灰色下划线分隔*/
+  border-bottom: 1px solid #d3d3d3;
+}
 .no-friends {
   text-align: center;
   color: #999;
   padding: 20px;
 }
+
+.info-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  overflow: hidden;
+  padding-left: 5px; 
+  padding-top: 5px;
+  margin-top: 2px;
+}
+
+.friend-name, .last-message {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.last-message {
+  color: #999; /* 设置浅灰色字体 */
+}
+
 </style>

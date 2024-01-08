@@ -27,6 +27,7 @@
             :key="group.id"
             class="contact-item"
             @contextmenu.prevent="showMenu($event, group)"
+            @dblclick="handleDblClick(group)"
           >
             <img
               :src="group.avatar ? group.avatar : require('@/assets/doge.png')"
@@ -42,6 +43,7 @@
             :key="friend.id"
             class="contact-item"
             @contextmenu.prevent="showMenu($event, friend)"
+            @dblclick="handleDblClick(friend)"
           >
             <img
               :src="
@@ -50,20 +52,25 @@
               alt="好友头像"
               class="avatar"
             />
-            <span>{{ friend.name }}</span>
-            <span>{{ friend.email }}</span>
+            <span>{{
+              friend.remark
+                ? friend.remark
+                : friend.name
+                ? friend.name
+                : friend.email
+            }}</span>
           </div>
         </div>
       </el-main>
     </el-container>
 
-    <ContextMenu ref="contextMenu" />
-    <InBox ref="InBoxDialog" />
+    <ContextMenu ref="contextMenu" @delete-contact="handleDeleteContact" />
+    <InBox ref="InBoxDialog" @handle-request="handleRequest"/>
   </div>
 </template>
 <script>
 import InBox from "../components/InBox.vue";
-import ContextMenu from "../components/ContextMenu.vue";
+import ContextMenu from "../components/littleComponents/ContextMenu.vue";
 import axios from "axios";
 
 export default {
@@ -87,8 +94,33 @@ export default {
     this.getFriends();
   },
   methods: {
+    handleRequest() {
+      console.log("处理好友请求");
+      this.getFriends();
+    },
+    handleDeleteContact(chat) {
+      console.log("删除好友或群组:", chat);
+    // 根据 chat 对象的类型来决定是删除好友还是群组
+    if (Object.prototype.hasOwnProperty.call(chat, 'email')) { // 对象有 email 属性
+      // 从 friends 数组中移除
+      console.log("删除好友:", chat);
+      this.friends = this.friends.filter(friend => friend.id !== chat.id);
+    } else { 
+      // 从 groupChats 数组中移除
+      this.groupChats = this.groupChats.filter(group => group.id !== chat.id);
+    }
+
+    console.log("删除操作完成，更新后的数据：", this.friends, this.groupChats);
+  },
     openInBox() {
       this.$refs.InBoxDialog.open();
+    },
+    handleDblClick(object) {
+      console.log("双击:", object);
+      if (object.id) {
+        this.$store.dispatch("setCurrentChat", object);
+        this.$router.push("/home/chat");
+      }
     },
     addFriend() {
       axios
@@ -156,6 +188,10 @@ export default {
 
 .contact-list {
   padding: 10px;
+  /* 增加侧边灰色边界线 */
+  border-right: 2px solid #d3d3d3;
+  border-left: 2px solid #d3d3d3;
+  user-select: none; /* 禁止选中文本 */
 }
 
 .contact-item {
@@ -163,6 +199,14 @@ export default {
   align-items: center;
   margin-bottom: 10px;
   cursor: pointer;
+  border-top: 1px solid #d3d3d3;
+  padding: 5px;
+  transition: background-color 0.3s; /* 添加过渡效果 */
+  user-select: none; /* 禁止选中文本 */
+}
+
+.contact-item:hover {
+  background-color: #f0f0f0; /* 鼠标悬停时的背景颜色 */
 }
 
 .avatar {

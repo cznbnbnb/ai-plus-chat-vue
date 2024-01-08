@@ -54,7 +54,6 @@ export default createStore({
         console.log("所有历史消息已加载");
         return;
       }
-
       axios
         .get("/chat/getMessage", {
           params: { friendId, page, limit: 30 },

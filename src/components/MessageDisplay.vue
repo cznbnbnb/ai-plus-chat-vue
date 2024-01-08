@@ -52,6 +52,14 @@ export default {
   },
 
   methods: {
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.messageDisplay;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      });
+    },
     formatTime(dateTimeObj) {
       if (!dateTimeObj) {
         return "";
@@ -87,18 +95,42 @@ export default {
     handleScroll() {
       const container = this.$refs.messageDisplay;
       const threshold = 100; // 距离顶部多少像素时开始加载
-      
+
       if (container.scrollTop < threshold) {
         this.currentPage++;
-        this.$store.dispatch("loadMessages", {
-          friendId: this.currentChat.id,
-          page: this.currentPage,
-        });
+        this.loadMessages();
       }
     },
-  },
 
+    loadMessages() {
+      console.log("加载消息" + this.$store.state.currentChat.id);
+      this.$store.dispatch("loadMessages", {
+        friendId: this.$store.state.currentChat.id,
+        page: this.currentPage,
+      });
+    },
+  },
+  watch: {
+    currentChat(newChat, oldChat) {
+      console.log("当前聊天变化:", newChat, oldChat);
+      if (newChat !== oldChat) {
+        this.currentPage = 1; // 重置页码
+        this.isFirstLoad = true;
+        this.loadMessages(); // 加载新聊天的消息
+      }
+    },
+    filteredMessages: function (newMessages) {
+      if (this.isFirstLoad && newMessages.length > 0) {
+        this.scrollToBottom();
+        this.isFirstLoad = false; // 更新标志变量
+      }
+    },
+    messages: function () {
+      this.scrollToBottom();
+    },
+  },
   mounted() {
+    this.scrollToBottom();
     const container = this.$refs.messageDisplay;
     container.addEventListener("scroll", this.handleScroll);
   },
@@ -114,16 +146,13 @@ export default {
   },
   created() {
     if (this.currentChat && this.currentChat.id) {
-      console.log("加载消息"+this.currentPage);
-      this.$store.dispatch("loadMessages", {
-        friendId: this.currentChat.id,
-        page: this.currentPage,
-      });
+      this.loadMessages(); // 加载初始页面的消息
     }
   },
   data() {
     return {
-      currentPage: 1, // 当前页码
+      currentPage: 1,
+      isFirstLoad: true, // 新增的标志变量
       // ...其他数据
     };
   },

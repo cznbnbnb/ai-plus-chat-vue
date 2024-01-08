@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '../views/HomePage.vue';
 import LoginForm from '../components/LoginForm.vue';
-import ChatView from '../views/ChatView.vue'; // 聊天界面视图，需创建
+import ChatView from '../views/ChatView.vue'; // 聊天界面视图
 import ContactsView from '../views/ContactsView.vue'; // 联系人视图
 import MomentsView from '../views/MomentsView.vue'; // 朋友圈视图
+import SettingsView from '../views/SettingsView.vue'; // 设置视图
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
         path: 'moments',
         name: 'Moments',
         component: MomentsView,
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: SettingsView,
       },
     ]
   },
