@@ -15,6 +15,7 @@
         <el-button type="primary" icon="el-icon-search" @click="addFriend"
           >添加好友</el-button
         >
+        <el-button type="success" icon="el-icon-plus" @click="showCreateGroupDialog">创建群聊</el-button>
         <el-button type="info" icon="el-icon-message" @click="openInBox"
           >收件箱</el-button
         >
@@ -66,17 +67,21 @@
 
     <ContextMenu ref="contextMenu" @delete-contact="handleDeleteContact" />
     <InBox ref="InBoxDialog" @handle-request="handleRequest"/>
+    <create-group-dialog ref="createGroupDialog"></create-group-dialog>
   </div>
 </template>
 <script>
 import InBox from "../components/InBox.vue";
 import ContextMenu from "../components/littleComponents/ContextMenu.vue";
 import axios from "axios";
+import CreateGroupDialog from "../components/CreateGroupDialog.vue";
 
 export default {
+  name: "ContactsView",
   components: {
     InBox,
     ContextMenu,
+    CreateGroupDialog,
   },
   data() {
     return {
@@ -162,6 +167,9 @@ export default {
         .catch((error) => {
           console.error("请求错误:", error);
         });
+    },
+    showCreateGroupDialog() {
+      this.$refs.createGroupDialog.dialogVisible = !this.$refs.createGroupDialog.dialogVisible;
     },
   },
 };
