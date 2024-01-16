@@ -3,7 +3,7 @@
     <el-container>
       <el-header>
         <el-input
-          placeholder="搜索好友..."
+          placeholder="搜索好友或群聊..."
           v-model="searchText"
           class="search-input"
         />
@@ -15,7 +15,15 @@
         <el-button type="primary" icon="el-icon-search" @click="addFriend"
           >添加好友</el-button
         >
-        <el-button type="success" icon="el-icon-plus" @click="showCreateGroupDialog">创建群聊</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="joinGroup"
+          >加入群聊</el-button
+        >
+        <el-button
+          type="success"
+          icon="el-icon-plus"
+          @click="showCreateGroupDialog"
+          >创建群聊</el-button
+        >
         <el-button type="info" icon="el-icon-message" @click="openInBox"
           >收件箱</el-button
         >
@@ -66,7 +74,7 @@
     </el-container>
 
     <ContextMenu ref="contextMenu" @delete-contact="handleDeleteContact" />
-    <InBox ref="InBoxDialog" @handle-request="handleRequest"/>
+    <InBox ref="InBoxDialog" @handle-request="handleRequest" />
     <create-group-dialog ref="createGroupDialog"></create-group-dialog>
   </div>
 </template>
@@ -87,36 +95,41 @@ export default {
     return {
       searchText: "", // 用于绑定搜索框的文本
       additionalMessage: "", // 用于绑定附加消息的文本
-      groupChats: [
-        { id: 1, name: "群聊1", avatar: require("@/assets/doge.png") },
-        { id: 2, name: "群聊2", avatar: require("@/assets/doge.png") },
-        // 更多群聊数据...
-      ],
+      groupChats: [],
       friends: [],
     };
   },
   created() {
     this.getFriends();
+    this.getGroupChats(); // 调用获取群组列表的方法
   },
   methods: {
     handleRequest() {
       console.log("处理好友请求");
       this.getFriends();
+      this.getGroupChats();
     },
     handleDeleteContact(chat) {
       console.log("删除好友或群组:", chat);
-    // 根据 chat 对象的类型来决定是删除好友还是群组
-    if (Object.prototype.hasOwnProperty.call(chat, 'email')) { // 对象有 email 属性
-      // 从 friends 数组中移除
-      console.log("删除好友:", chat);
-      this.friends = this.friends.filter(friend => friend.id !== chat.id);
-    } else { 
-      // 从 groupChats 数组中移除
-      this.groupChats = this.groupChats.filter(group => group.id !== chat.id);
-    }
+      // 根据 chat 对象的类型来决定是删除好友还是群组
+      if (Object.prototype.hasOwnProperty.call(chat, "email")) {
+        // 对象有 email 属性
+        // 从 friends 数组中移除
+        console.log("删除好友:", chat);
+        this.friends = this.friends.filter((friend) => friend.id !== chat.id);
+      } else {
+        // 从 groupChats 数组中移除
+        this.groupChats = this.groupChats.filter(
+          (group) => group.id !== chat.id
+        );
+      }
 
-    console.log("删除操作完成，更新后的数据：", this.friends, this.groupChats);
-  },
+      console.log(
+        "删除操作完成，更新后的数据：",
+        this.friends,
+        this.groupChats
+      );
+    },
     openInBox() {
       this.$refs.InBoxDialog.open();
     },
@@ -127,6 +140,7 @@ export default {
         this.$router.push("/home/chat");
       }
     },
+
     addFriend() {
       axios
         .post(
@@ -140,13 +154,58 @@ export default {
           }
         )
         .then((response) => {
-          console.log("好友申请成功:", response.data);
-          // 可以清空搜索和附加消息
+          if (response.data.code === 1) {
+            console.log("好友申请成功:", response.data.msg);
+            this.$message.success(response.data.msg);
+          } else {
+            console.error("好友申请失败:", response.data.msg);
+            this.$message.error(response.data.msg);
+          }
+          // 清空搜索和附加消息
           this.searchText = "";
           this.additionalMessage = "";
         })
         .catch((error) => {
-          console.error("好友申请失败:", error);
+          console.error("好友申请请求失败:", error);
+          let errorMsg =
+            error.response && error.response.data && error.response.data.msg
+              ? error.response.data.msg
+              : "好友申请过程中出现错误";
+          this.$message.error(errorMsg);
+        });
+    },
+
+    joinGroup() {
+      axios
+        .post(
+          "/group/joinGroup",
+          {
+            name: this.searchText,
+            message: this.additionalMessage,
+          },
+          {
+            withCredentials: true,
+          }
+        )
+        .then((response) => {
+          if (response.data.code === 1) {
+            console.log("加入群聊成功:", response.data.msg);
+            this.$message.success(response.data.msg);
+          } else {
+            console.error("加入群聊失败:", response.data.msg);
+            this.$message.error(response.data.msg);
+          }
+          // 清空搜索和附加消息
+          this.searchText = "";
+          this.additionalMessage = "";
+        })
+        .catch((error) => {
+          console.error("加入群聊请求失败:", error);
+          let errorMsg =
+            error.response && error.response.data && error.response.data.msg
+              ? error.response.data.msg
+              : "加入群聊过程中出现错误";
+          this.$message.error(errorMsg);
         });
     },
 
@@ -168,8 +227,25 @@ export default {
           console.error("请求错误:", error);
         });
     },
+    // 新增方法：获取群组列表
+    getGroupChats() {
+      axios
+        .get("/group/getAllGroupList", { withCredentials: true })
+        .then((response) => {
+          if (response.data.code === 1) {
+            this.groupChats = response.data.data;
+          } else {
+            console.error("获取群组列表失败:", response.data.msg);
+            this.groupChats = []; // 如果失败，清空群组列表
+          }
+        })
+        .catch((error) => {
+          console.error("请求群组列表错误:", error);
+        });
+    },
     showCreateGroupDialog() {
-      this.$refs.createGroupDialog.dialogVisible = !this.$refs.createGroupDialog.dialogVisible;
+      this.$refs.createGroupDialog.dialogVisible =
+        !this.$refs.createGroupDialog.dialogVisible;
     },
   },
 };
