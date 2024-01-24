@@ -35,14 +35,31 @@ export default {
   },
   mounted() {
     this.getFriendList();
+    this.getGroupList();
   },
   methods: {
+    getGroupList() {
+      axios
+        .get("group/getGroupList", { withCredentials: true })
+        .then((response) => {
+          if (response.data && Array.isArray(response.data.data)) {
+            this.friends = this.friends.concat(response.data.data);
+          } else {
+            // 如果响应不是预期格式，保持 friends 为初始的空数组或设置为其他默认值
+            this.friends = []; // 或其他默认值，如 [{}] 或 [默认好友对象]
+          }
+        })
+        .catch((error) => {
+          console.error("获取群组列表失败:", error);
+          this.friends = []; // 发生错误时，设置为初始的空数组或其他默认值
+        });
+    },
     getFriendList() {
       axios
         .get("user/getFriendList", { withCredentials: true })
         .then((response) => {
           if (response.data && Array.isArray(response.data.data)) {
-            this.friends = response.data.data;
+            this.friends = this.friends.concat(response.data.data);
           } else {
             // 如果响应不是预期格式，保持 friends 为初始的空数组或设置为其他默认值
             this.friends = []; // 或其他默认值，如 [{}] 或 [默认好友对象]

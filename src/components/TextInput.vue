@@ -25,10 +25,13 @@ export default {
       if (this.message.trim() && this.$store.state.currentUser) {
         const chatMessage = {
           senderId: this.$store.state.currentUser.id, // 使用 Vuex store 中的当前用户ID
+          senderName: this.$store.state.currentUser.name, // 使用 Vuex store 中的当前用户昵称
           receiverId: this.$store.state.currentChat.id, // 当前聊天对象ID
+          receiverName: this.$store.state.currentChat.name, // 当前聊天对象昵称
+          //如果email为空，说明是群聊receiverType=1否则为0
+          receiverType: this.$store.state.currentChat.email ? 0 : 1,
           content: this.message,
           type: 0, // 假设 0 表示文本消息
-          // ... 其他字段
         };
 
         WebSocketService.send(chatMessage);

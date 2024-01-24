@@ -27,6 +27,7 @@ export default createStore({
     },
     CLEAR_MESSAGES(state) {
       state.messages = [];
+      state.isAllMessagesLoaded = false;
     },
     ADD_HISTORY_MESSAGES(state, historyMessages) {
       // 将历史消息添加到数组的开头
@@ -35,6 +36,9 @@ export default createStore({
     SET_ALL_MESSAGES_LOADED(state, value) {
       state.isAllMessagesLoaded = value;
     },
+    SET_CURRENT_PAGE(state, value) {
+      state.currentPage = value;
+    }
   },
   actions: {
     // 更新当前用户信息
@@ -43,6 +47,8 @@ export default createStore({
     },
     // 更新当前聊天对象信息
     setCurrentChat({ commit }, chat) {
+      console.log("更新当前聊天对象信息", chat);
+      commit("CLEAR_MESSAGES");
       commit("SET_CURRENT_CHAT", chat);
     },
     // 接收新消息
