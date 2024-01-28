@@ -47,6 +47,11 @@ export default createStore({
     },
     // 更新当前聊天对象信息
     setCurrentChat({ commit }, chat) {
+    //如果新的聊天对象和当前聊天对象相同，则不做任何操作
+    if (chat && chat.id === this.state.currentChat?.id) {
+      return;
+    }
+
       console.log("更新当前聊天对象信息", chat);
       commit("CLEAR_MESSAGES");
       commit("SET_CURRENT_CHAT", chat);

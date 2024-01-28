@@ -35,7 +35,7 @@
             v-for="group in groupChats"
             :key="group.id"
             class="contact-item"
-            @contextmenu.prevent="showMenu($event, group)"
+            @contextmenu.prevent="showGroupMenu($event, group)"
             @dblclick="handleDblClick(group)"
           >
             <img
@@ -51,7 +51,7 @@
             v-for="friend in friends"
             :key="friend.id"
             class="contact-item"
-            @contextmenu.prevent="showMenu($event, friend)"
+            @contextmenu.prevent="showFriendMenu($event, friend)"
             @dblclick="handleDblClick(friend)"
           >
             <img
@@ -74,6 +74,7 @@
     </el-container>
 
     <ContextMenu ref="contextMenu" @delete-contact="handleDeleteContact" />
+    <GroupContextMenu ref="groupContextMenu" @delete-contact="handleDeleteContact"/>
     <InBox ref="InBoxDialog" @handle-request="handleRequest" />
     <create-group-dialog ref="createGroupDialog"></create-group-dialog>
   </div>
@@ -81,6 +82,7 @@
 <script>
 import InBox from "../components/InBox.vue";
 import ContextMenu from "../components/littleComponents/ContextMenu.vue";
+import GroupContextMenu from "../components/littleComponents/GroupContextMenu.vue";
 import axios from "axios";
 import CreateGroupDialog from "../components/CreateGroupDialog.vue";
 
@@ -89,6 +91,7 @@ export default {
   components: {
     InBox,
     ContextMenu,
+    GroupContextMenu,
     CreateGroupDialog,
   },
   data() {
@@ -209,10 +212,16 @@ export default {
         });
     },
 
-    showMenu(event, friend) {
+    showFriendMenu(event, friend) {
       this.$store.dispatch("setCurrentChat", friend);
       this.$refs.contextMenu.open(event);
     },
+
+    showGroupMenu(event, group) {
+      this.$store.dispatch("setCurrentChat", group);
+      this.$refs.groupContextMenu.open(event);
+    },
+
     getFriends() {
       axios
         .get("/user/getAllFriendList", {}, { withCredentials: true })
