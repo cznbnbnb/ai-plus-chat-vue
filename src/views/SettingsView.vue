@@ -117,31 +117,56 @@ export default {
 
 <style scoped>
 .settings-container {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
+  display: flex;
+  width: 40%;
+  height: 85%;
+  margin: 30px;
+  padding: 15px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.1); /* 添加阴影效果 */
+  background-color: #fff; /* 背景色 */
+  border-radius: 8px; /* 圆角 */
+}
+
+.el-form-item {
+  margin-bottom: 10px; /* 增加表单项间距 */
+}
+
+.el-form-item label {
+  font-weight: bold; /* 加粗标签字体 */
 }
 
 .avatar-uploader {
-  display: block;
-  width: 100px;
-  height: 100px;
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  overflow: hidden;
+  border: none; /* 移除虚线边框 */
+  margin-bottom: 15px; /* 调整下边距 */
 }
 
 .avatar {
-  width: 100%;
-  height: 100%;
-  display: block;
+  border-radius: 50%; /* 头像圆形显示 */
+  width: 120px; /* 调整宽度 */
+  height: 120px; /* 调整高度 */
+  object-fit: cover; /* 保证图片比例 */
+  margin: 0 auto; /* 居中显示 */
 }
 
 .avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  line-height: 100px;
-  text-align: center;
+  color: #409eff; /* 调整图标颜色 */
 }
+
+.el-button {
+  width: 100%; /* 按钮宽度全填充 */
+}
+
+.el-input, .el-radio-group {
+  border-radius: 4px; /* 输入框和单选按钮组圆角 */
+}
+.el-upload .el-upload__button {
+  display: none; /* 隐藏默认的上传按钮 */
+}
+
+.avatar-uploader .el-upload-dragger {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 </style>

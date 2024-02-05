@@ -9,7 +9,17 @@
           'other-message': message.senderId !== $store.state.currentUser.id,
         }"
       >
-        <div class="message-content">{{ message.content }}</div>
+        <!-- 图片消息 -->
+        <img
+          v-if="message.type === 1"
+          :src="message.content"
+          class="message-image"
+          alt="图片"
+        />
+
+        <!-- 文本消息 -->
+        <div v-else class="message-content">{{ message.content }}</div>
+
         <div
           class="message-info"
           :class="{
@@ -31,6 +41,9 @@ import { mapState } from "vuex";
 export default {
   name: "MessageDisplay",
   computed: {
+    shouldScroll() {
+      return this.$store.state.shouldScrollToBottom;
+    },
     ...mapState(["messages", "currentUser", "currentChat"]),
     filteredMessages() {
       if (
@@ -95,7 +108,6 @@ export default {
     handleScroll() {
       const container = this.$refs.messageDisplay;
       const threshold = 100; // 距离顶部多少像素时开始加载
-
       if (container.scrollTop < threshold) {
         this.currentPage++;
         this.loadMessages();
@@ -107,10 +119,20 @@ export default {
       this.$store.dispatch("loadMessages", {
         friendId: this.$store.state.currentChat.id,
         page: this.currentPage,
+        messageInstance: this.$message,
       });
     },
   },
   watch: {
+    shouldScroll(newValue) {
+      if (newValue) {
+        console.log("shouldScroll变化:", newValue);
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 300);
+        this.$store.commit("SET_SHOULD_SCROLL_TO_BOTTOM", false);
+      }
+    },
     currentChat(newChat, oldChat) {
       console.log("当前聊天变化:", newChat, oldChat);
       if (newChat !== oldChat) {
@@ -126,6 +148,7 @@ export default {
       }
     },
     messages: function () {
+      console.log("消息列表变化");
       this.scrollToBottom();
     },
   },
@@ -144,11 +167,6 @@ export default {
       );
     }
   },
-  created() {
-    if (this.currentChat && this.currentChat.id) {
-      this.loadMessages(); // 加载初始页面的消息
-    }
-  },
   data() {
     return {
       currentPage: 1,
@@ -163,7 +181,10 @@ export default {
 .message-display {
   padding: 10px;
   overflow-y: auto;
-  height: 400px;
+  /* 灰色边界线 */
+  border: 3px solid #dbdde0;
+  border-radius: 5px;
+  height: 55vh;
 }
 
 .message-display ul {
@@ -181,29 +202,35 @@ export default {
   align-items: flex-end; /* 自己的消息靠右对齐 */
 }
 
-.my-message .message-content {
-  background-color: #d3f9d8;
-}
-
 .other-message {
   align-items: flex-start; /* 朋友的消息靠左对齐 */
+}
+
+.message-content,
+.message-image {
+  border-radius: 10px;
+  max-width: 80%;
+  margin-bottom: 5px;
+}
+
+.message-content {
+  padding: 5px 10px;
+  background-color: #d3f9d8;
 }
 
 .other-message .message-content {
   background-color: #f0f0f0;
 }
 
-.message-content {
-  padding: 5px 10px;
-  border-radius: 10px;
-  max-width: 80%;
+.message-image {
+  max-width: 100px; /* 调整为所需大小 */
+  height: auto;
 }
 
 .message-info {
   font-size: 12px;
   color: #666;
   margin-top: 5px;
-  text-align: right; /* 时间信息靠右对齐 */
   width: 100%;
 }
 

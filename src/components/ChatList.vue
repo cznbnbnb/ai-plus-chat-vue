@@ -83,11 +83,12 @@ export default {
 
 <style scoped>
 .chat-list-container {
-  border: 1px solid #d3d3d3; /* 灰色边框 */
+  border: 1px solid #eadede; /* 灰色边框 */
   border-radius: 5px; /* 圆角边框 */
+  background-color: #ffffff;
   overflow: hidden; /* 隐藏超出边框的内容 */
-  width: 190px; /* 设定宽度 */
-  height: 550px; /* 设定高度 */
+  width: auto; /* 宽度自适应 */
+  height: 100%; /* 高度自适应 */
 }
 
 .chat-list {
@@ -105,7 +106,7 @@ export default {
 }
 
 .el-list-item:hover {
-  background-color: #f5f7fa;
+  background-color: #cacbcc;
   /* 悬停时的背景颜色 */
 }
 
@@ -126,6 +127,12 @@ export default {
   /*增加灰色下划线分隔*/
   border-bottom: 1px solid #d3d3d3;
 }
+
+.friend-info:hover {
+  background-color: #f0f0f0;
+  /* 悬停时的背景颜色 */
+}
+
 .no-friends {
   text-align: center;
   color: #999;

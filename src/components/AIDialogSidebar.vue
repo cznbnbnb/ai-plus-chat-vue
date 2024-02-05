@@ -120,7 +120,7 @@ export default {
 
 .dialog-history {
   overflow-y: auto;
-  height: calc(100% - 180px); /* 调整高度 */
+  height: calc(100% - 180px);
   padding: 10px;
   background-color: white; /* 白色背景 */
   border: 1px solid #ebeef5; /* 淡灰色边框 */
@@ -162,6 +162,12 @@ export default {
   display: block;
   max-width: 70%;
   clear: both; /* 清除浮动 */
+}
+
+.ai-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 80%;
 }
 
 .dialog-history {

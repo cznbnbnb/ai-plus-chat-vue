@@ -15,3 +15,4 @@ app.use(router);
 app.use(store); // 使用 Vuex store
 app.use(ElementPlus);
 app.mount('#app');
+

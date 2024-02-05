@@ -7,6 +7,8 @@ export default createStore({
     currentChat: null, // 当前聊天对象信息
     messages: [], // 聊天消息列表
     isAllMessagesLoaded: false, // 是否已加载所有历史消息
+    shouldScrollToBottom: false, // 是否应该滚动到底部
+    lastReminderTime: 0, // 上次提醒时间
   },
   mutations: {
     // 设置当前用户
@@ -38,9 +40,16 @@ export default createStore({
     },
     SET_CURRENT_PAGE(state, value) {
       state.currentPage = value;
-    }
+    },
+    SET_SHOULD_SCROLL_TO_BOTTOM(state, value) {
+      console.log("4", state.shouldScrollToBottom);
+      state.shouldScrollToBottom = value;
+    },
   },
   actions: {
+    clearMessages({ commit }) {
+      commit("CLEAR_MESSAGES");
+    },
     // 更新当前用户信息
     setCurrentUser({ commit }, user) {
       commit("SET_CURRENT_USER", user);
@@ -60,9 +69,13 @@ export default createStore({
     receiveMessage({ commit }, message) {
       commit("RECEIVE_MESSAGE", message);
     },
-    loadMessages({ commit, state }, { friendId, page }) {
+    loadMessages({ commit, state }, { friendId, page, messageInstance}) {
       if (state.isAllMessagesLoaded) {
-        console.log("所有历史消息已加载");
+        let currentTime = Date.now();
+        if (currentTime - state.lastReminderTime > 3000) {
+          messageInstance({ type: "info", message: "已加载所有聊天记录" });
+          state.lastReminderTime = currentTime; // 更新上次提醒时间
+        }
         return;
       }
       axios
@@ -86,6 +99,7 @@ export default createStore({
           console.error("请求历史消息时发生错误:", error);
         });
     },
+
   },
   modules: {
     // 其他 Vuex 模块（如果有）

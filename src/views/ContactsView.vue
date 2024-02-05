@@ -24,57 +24,76 @@
           @click="showCreateGroupDialog"
           >创建群聊</el-button
         >
-        <el-button type="info" icon="el-icon-message" @click="openInBox"
-          >收件箱</el-button
-        >
+        <el-button type="info" @click="openInBox">
+          <el-icon><Message /></el-icon>
+          收件箱
+        </el-button>
       </el-header>
       <el-main>
-        <div class="contact-list">
-          <h3>群聊</h3>
-          <div
-            v-for="group in groupChats"
-            :key="group.id"
-            class="contact-item"
-            @contextmenu.prevent="showGroupMenu($event, group)"
-            @dblclick="handleDblClick(group)"
-          >
-            <img
-              :src="group.avatar ? group.avatar : require('@/assets/doge.png')"
-              alt="群聊头像"
-              class="avatar"
-            />
-            <span>{{ group.name }}</span>
-          </div>
-
-          <h3>好友</h3>
-          <div
-            v-for="friend in friends"
-            :key="friend.id"
-            class="contact-item"
-            @contextmenu.prevent="showFriendMenu($event, friend)"
-            @dblclick="handleDblClick(friend)"
-          >
-            <img
-              :src="
-                friend.avatar ? friend.avatar : require('@/assets/doge.png')
-              "
-              alt="好友头像"
-              class="avatar"
-            />
-            <span>{{
-              friend.remark
-                ? friend.remark
-                : friend.name
-                ? friend.name
-                : friend.email
-            }}</span>
-          </div>
-        </div>
+        <el-row>
+          <el-col :span="12">
+            <div v-if="groupChats.length" class="group-list">
+              <h3 class="title-border">群聊</h3>
+              <div
+                v-for="group in groupChats"
+                :key="group.id"
+                class="contact-item"
+                @contextmenu.prevent="showGroupMenu($event, group)"
+                @dblclick="handleDblClick(group)"
+              >
+                <img
+                  :src="group.avatar ? group.avatar : require('@/assets/doge.png')"
+                  alt="群聊头像"
+                  class="avatar"
+                />
+                <span>{{ group.name }}</span>
+              </div>
+            </div>
+            <div v-else class="group-list">
+              <h3 class="title-border">群聊</h3>
+              <p class="tip-text">还未添加群聊哦，快去添加吧！</p>
+            </div>
+          </el-col>
+          <el-col :span="12">
+            <div v-if="friends.length" class="friend-list">
+              <h3 class="title-border">好友</h3>
+              <div
+                v-for="friend in friends"
+                :key="friend.id"
+                class="contact-item"
+                @contextmenu.prevent="showFriendMenu($event, friend)"
+                @dblclick="handleDblClick(friend)"
+              >
+                <img
+                  :src="
+                    friend.avatar ? friend.avatar : require('@/assets/doge.png')
+                  "
+                  alt="好友头像"
+                  class="avatar"
+                />
+                <span>{{
+                  friend.remark
+                    ? friend.remark
+                    : friend.name
+                    ? friend.name
+                    : friend.email
+                }}</span>
+              </div>
+            </div>
+            <div v-else class="friend-list">
+              <h3 class="title-border">好友</h3>
+              <p class="tip-text">还未添加好友哦，快去添加吧！</p>
+            </div>
+          </el-col>
+        </el-row>
       </el-main>
     </el-container>
 
     <ContextMenu ref="contextMenu" @delete-contact="handleDeleteContact" />
-    <GroupContextMenu ref="groupContextMenu" @delete-contact="handleDeleteContact"/>
+    <GroupContextMenu
+      ref="groupContextMenu"
+      @delete-contact="handleDeleteContact"
+    />
     <InBox ref="InBoxDialog" @handle-request="handleRequest" />
     <create-group-dialog ref="createGroupDialog"></create-group-dialog>
   </div>
@@ -85,6 +104,9 @@ import ContextMenu from "../components/littleComponents/ContextMenu.vue";
 import GroupContextMenu from "../components/littleComponents/GroupContextMenu.vue";
 import axios from "axios";
 import CreateGroupDialog from "../components/CreateGroupDialog.vue";
+import {
+  Message,
+} from "@element-plus/icons-vue";
 
 export default {
   name: "ContactsView",
@@ -93,6 +115,7 @@ export default {
     ContextMenu,
     GroupContextMenu,
     CreateGroupDialog,
+    Message,
   },
   data() {
     return {
@@ -260,46 +283,50 @@ export default {
 };
 </script>
 <style scoped>
-.el-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #b3c0d1;
-  color: white;
-  padding: 15px 30px; /* 调整了内边距 */
+.tip-text {
+  text-align: center;
+  color: #999;
+  margin-top: 10px;
 }
 
-.search-input,
-.additional-message {
-  margin-right: 10px; /* 添加外边距，使输入框之间有间隔 */
-  flex-grow: 1; /* 使输入框自适应宽度 */
+.title-border {
+  border-bottom: 1px solid #ccc; /* Gray bottom border */
+  padding-bottom: 5px; /* Optional: Adjust padding as needed */
+}
+.el-button .el-icon {
+  margin-right: 10px; /* 或者您希望的任何间距值 */
 }
 
-.additional-message {
-  margin-left: 10px; /* 为附加消息输入框添加左侧外边距 */
-}
-
-.contact-list {
+/* 容器样式 */
+.group-list, .friend-list {
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 2%;
   padding: 10px;
-  /* 增加侧边灰色边界线 */
-  border-right: 2px solid #d3d3d3;
-  border-left: 2px solid #d3d3d3;
-  user-select: none; /* 禁止选中文本 */
+  margin-bottom: 20px;
 }
 
 .contact-item {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
-  cursor: pointer;
-  border-top: 1px solid #d3d3d3;
-  padding: 5px;
-  transition: background-color 0.3s; /* 添加过渡效果 */
+  padding: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.3s;
   user-select: none; /* 禁止选中文本 */
+}
+.contact-item:last-child {
+  border-bottom: none;
 }
 
 .contact-item:hover {
   background-color: #f0f0f0; /* 鼠标悬停时的背景颜色 */
+}
+
+/* 文本样式 */
+.contact-item span {
+  font-size: 14px;
+  color: #333;
 }
 
 .avatar {
@@ -308,4 +335,59 @@ export default {
   border-radius: 50%;
   margin-right: 10px;
 }
+.el-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f7f9fc; /* 浅灰色背景 */
+  color: #333;
+  padding: 15px 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-input,
+.additional-message {
+  border: 1px solid #d1d4da;
+  border-radius: 4px;
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.search-input {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.el-button {
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.el-button:hover {
+  opacity: 0.9;
+}
+
+/* 主题色按钮样式 */
+.el-button--primary {
+  background-color: #409eff; /* 蓝色 */
+  color: white;
+}
+
+.el-button--success {
+  background-color: #409eff; /* 蓝色 */
+  color: white;
+}
+.el-button--success:hover {
+  background-color: #7cb9f7; /* 蓝色 */
+}
+
+.el-button--info {
+  background-color: #909399; /* 灰色 */
+  color: white;
+}
+
+
+
 </style>
