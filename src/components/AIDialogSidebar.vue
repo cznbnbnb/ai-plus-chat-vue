@@ -7,7 +7,7 @@
     class="ai-drawer"
   >
     <div class="ai-header">
-      <img src="@/assets/doge.png" alt="AI头像" class="ai-avatar" />
+      <img src="../assets/green.png" alt="AI头像" class="ai-avatar" />
       <h3>AI助手</h3>
     </div>
 

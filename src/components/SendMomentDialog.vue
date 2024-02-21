@@ -84,8 +84,6 @@ export default {
     },
 
     submitMoment() {
-      // 如果只上传一张图片，直接使用第一个元素即可
-      // 如果需要上传多张图片，可以使用 join 方法将数组转换为字符串
       const imagesString = this.momentForm.images.join(",");
 
       // 创建一个新的请求体对象
@@ -114,6 +112,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .el-dialog {
   /* 使用现代简约风格的颜色和字体 */

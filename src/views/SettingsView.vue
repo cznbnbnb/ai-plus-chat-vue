@@ -2,7 +2,7 @@
   <el-card class="settings-container">
     <el-form ref="settingsForm" :model="settingsForm" label-position="top">
       <!-- 头像上传 -->
-      <el-form-item label="头像">
+      <el-form-item label="头像：">
         <el-upload
           class="avatar-uploader"
           action="http://localhost:8080/file/upload"
@@ -17,12 +17,12 @@
       </el-form-item>
 
       <!-- 姓名 -->
-      <el-form-item label="姓名">
+      <el-form-item label="姓名：">
         <el-input v-model="settingsForm.name"></el-input>
       </el-form-item>
 
       <!-- 性别 -->
-      <el-form-item label="性别">
+      <el-form-item label="性别：">
         <el-radio-group v-model="settingsForm.sex">
           <el-radio label="F">女</el-radio>
           <el-radio label="M">男</el-radio>
@@ -30,8 +30,18 @@
       </el-form-item>
 
       <!-- 邮箱 -->
-      <el-form-item label="邮箱">
+      <el-form-item label="邮箱：" >
         <el-input v-model="settingsForm.email"></el-input>
+      </el-form-item>
+
+      <!-- 旧密码（未设置请置空） -->
+      <el-form-item label="旧密码（首次无需）：">
+        <el-input v-model="settingsForm.oldPassword" type="password" oncopy="return false"></el-input>
+      </el-form-item>
+
+      <!-- 新密码 -->
+      <el-form-item label="新密码：">
+        <el-input v-model="settingsForm.newPassword" type="password"></el-input>
       </el-form-item>
 
       <!-- 提交按钮 -->
@@ -53,6 +63,8 @@ export default {
         name: "",
         sex: "",
         email: "",
+        oldPassword: "",
+        newPassword: "",
         avatar: "", // 头像URL
       },
       avatar: "", // 用于展示的头像
@@ -86,13 +98,34 @@ export default {
     },
 
     submitForm() {
+      if (this.settingsForm.oldPassword && !this.settingsForm.newPassword) {
+        this.$message.error("请输入新密码");
+        return;
+      }
+      if (!this.settingsForm.oldPassword && this.settingsForm.newPassword) {
+        this.$message.error("请输入旧密码");
+        return;
+      }
+      if (this.settingsForm.oldPassword && this.settingsForm.newPassword) {
+        if (this.settingsForm.oldPassword === this.settingsForm.newPassword) {
+          this.$message.error("新密码不能与旧密码相同");
+          return;
+        }
+      }
+      if (!this.settingsForm.email) {
+        this.$message.error("请输入邮箱");
+        return;
+      }
+      // 提交设置
       axios
         .post("/user/settings", this.settingsForm)
         .then((response) => {
           if (response.data.code === 1) {
             console.log("设置更新成功:", response.data);
+            this.$message.success(response.data.msg);
           } else {
             console.error("设置更新失败:", response.data.msg);
+            this.$message.error(response.data.msg);
           }
         })
         .catch((error) => {
@@ -104,6 +137,7 @@ export default {
     if (this.$store.state.currentUser&&this.$store.state.currentUser.id) {
       //初始化页面的时候，从 Vuex store中获取用户信息
       this.settingsForm = this.$store.state.currentUser;
+      console.log("用户信息:", this.settingsForm);
       if (this.settingsForm.avatar){
         this.avatar = this.settingsForm.avatar;
       }
@@ -125,10 +159,15 @@ export default {
   box-shadow: 0 2px 12px rgba(0,0,0,.1); /* 添加阴影效果 */
   background-color: #fff; /* 背景色 */
   border-radius: 8px; /* 圆角 */
+  overflow: auto; /* 允许滚动 */
 }
 
 .el-form-item {
   margin-bottom: 10px; /* 增加表单项间距 */
+}
+
+.el-button {
+  margin-bottom: 25px; /* 调整按钮下边距 */
 }
 
 .el-form-item label {
@@ -167,6 +206,10 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+* {
+  font-weight: bold;
 }
 
 </style>
