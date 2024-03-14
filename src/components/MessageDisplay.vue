@@ -1,32 +1,20 @@
 <template>
   <div class="message-display" ref="messageDisplay">
     <ul>
-      <li
-        v-for="message in filteredMessages"
-        :key="message.id"
-        :class="{
-          'my-message': message.senderId === $store.state.currentUser.id,
-          'other-message': message.senderId !== $store.state.currentUser.id,
-        }"
-      >
+      <li v-for="message in filteredMessages" :key="message.id" :class="{
+        'my-message': message.senderId === $store.state.currentUser.id,
+        'other-message': message.senderId !== $store.state.currentUser.id,
+      }">
         <!-- 图片消息 -->
-        <img
-          v-if="message.type === 1"
-          :src="message.content"
-          class="message-image"
-          alt="图片"
-        />
+        <img v-if="message.type === 1" :src="message.content" class="message-image" alt="图片" />
 
         <!-- 文本消息 -->
         <div v-else class="message-content">{{ message.content }}</div>
 
-        <div
-          class="message-info"
-          :class="{
-            'time-right': message.senderId === $store.state.currentUser.id,
-            'time-left': message.senderId !== $store.state.currentUser.id,
-          }"
-        >
+        <div class="message-info" :class="{
+        'time-right': message.senderId === $store.state.currentUser.id,
+        'time-left': message.senderId !== $store.state.currentUser.id,
+      }">
           <span class="message-sender">{{ message.senderName }}</span>
           <span class="message-time">{{ formatTime(message.createTime) }}</span>
         </div>
@@ -96,10 +84,10 @@ export default {
       const dateTimeStr = `${year}-${monthValue
         .toString()
         .padStart(2, "0")}-${dayOfMonth.toString().padStart(2, "0")} ${hour
-        .toString()
-        .padStart(2, "0")}:${minute.toString().padStart(2, "0")}:${second
-        .toString()
-        .padStart(2, "0")}`;
+          .toString()
+          .padStart(2, "0")}:${minute.toString().padStart(2, "0")}:${second
+            .toString()
+            .padStart(2, "0")}`;
 
       // 直接返回这个字符串
       return dateTimeStr;
@@ -156,6 +144,11 @@ export default {
     this.scrollToBottom();
     const container = this.$refs.messageDisplay;
     container.addEventListener("scroll", this.handleScroll);
+
+    // 如果当前聊天对象已设置，则立即加载消息
+    if (this.currentChat) {
+      this.loadMessages();
+    }
   },
 
   beforeUnmount() {
@@ -199,11 +192,13 @@ export default {
 }
 
 .my-message {
-  align-items: flex-end; /* 自己的消息靠右对齐 */
+  align-items: flex-end;
+  /* 自己的消息靠右对齐 */
 }
 
 .other-message {
-  align-items: flex-start; /* 朋友的消息靠左对齐 */
+  align-items: flex-start;
+  /* 朋友的消息靠左对齐 */
 }
 
 .message-content,
@@ -223,7 +218,8 @@ export default {
 }
 
 .message-image {
-  max-width: 100px; /* 调整为所需大小 */
+  max-width: 100px;
+  /* 调整为所需大小 */
   height: auto;
 }
 

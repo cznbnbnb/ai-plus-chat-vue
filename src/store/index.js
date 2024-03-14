@@ -11,6 +11,9 @@ export default createStore({
     lastReminderTime: 0, // 上次提醒时间
   },
   mutations: {
+    SET_LOGGED_IN(state, value) {
+      state.isLoggedIn = value;
+    },
     // 设置当前用户
     SET_CURRENT_USER(state, user) {
       state.currentUser = user;
@@ -47,19 +50,24 @@ export default createStore({
     },
   },
   actions: {
+    setLoggedIn({ commit }, value) {
+      commit("SET_LOGGED_IN", value);
+    },
     clearMessages({ commit }) {
       commit("CLEAR_MESSAGES");
     },
     // 更新当前用户信息
     setCurrentUser({ commit }, user) {
+      console.log("更新当前用户信息", user);
       commit("SET_CURRENT_USER", user);
     },
     // 更新当前聊天对象信息
     setCurrentChat({ commit }, chat) {
-    //如果新的聊天对象和当前聊天对象相同，则不做任何操作
-    if (chat && chat.id === this.state.currentChat?.id) {
-      return;
-    }
+      console.log("更新当前聊天对象信息", chat);
+      //如果新的聊天对象和当前聊天对象相同，则不做任何操作
+      if (chat && chat.id === this.state.currentChat?.id) {
+        return;
+      }
 
       console.log("更新当前聊天对象信息", chat);
       commit("CLEAR_MESSAGES");
@@ -69,7 +77,7 @@ export default createStore({
     receiveMessage({ commit }, message) {
       commit("RECEIVE_MESSAGE", message);
     },
-    loadMessages({ commit, state }, { friendId, page, messageInstance}) {
+    loadMessages({ commit, state }, { friendId, page, messageInstance }) {
       if (state.isAllMessagesLoaded) {
         let currentTime = Date.now();
         if (currentTime - state.lastReminderTime > 3000) {
@@ -99,7 +107,6 @@ export default createStore({
           console.error("请求历史消息时发生错误:", error);
         });
     },
-
   },
   modules: {
     // 其他 Vuex 模块（如果有）

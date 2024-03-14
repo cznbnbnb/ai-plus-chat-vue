@@ -13,10 +13,7 @@
 
       <!-- 确认密码 -->
       <el-form-item label="确认密码">
-        <el-input
-          type="password"
-          v-model="registerForm.confirmPassword"
-        ></el-input>
+        <el-input type="password" v-model="registerForm.confirmPassword"></el-input>
       </el-form-item>
       <slider-captcha @verified="handleVerification"></slider-captcha>
       <!-- 输入验证码 -->
@@ -26,9 +23,8 @@
             <el-input v-model="registerForm.captcha"></el-input>
           </el-col>
           <el-col :span="8">
-            <el-button type="primary" @click="getCaptcha" style="float: right"
-              >获取验证码</el-button
-            >
+            <el-button type="primary" @click="getCaptcha" style="float: right" class="verification-code-btn" :disabled="!canSendCode">{{
+    canSendCode ? '获取验证码' : countdown + '秒后重试' }}</el-button>
           </el-col>
         </el-row>
       </el-form-item>
@@ -61,6 +57,8 @@ export default {
         captcha: "",
       },
       verified: false,
+      countdown: 0, // 倒计时秒数
+      canSendCode: true, // 是否可以发送验证码
     };
   },
   methods: {
@@ -68,6 +66,10 @@ export default {
       this.verified = verified;
     },
     getCaptcha() {
+      if (!this.canSendCode) {
+        this.$message.error("请稍后再试");
+        return;
+      }
       if (!this.verified) {
         this.$message.error("请先完成滑块验证");
         return;
@@ -82,13 +84,26 @@ export default {
         .post("/user/sendMsg", { email: this.registerForm.email })
         .then((response) => {
           console.log("验证码发送:", response.data);
+          this.startCountdown(); // 开始倒计时
         })
         .catch((error) => {
           console.error("验证码发送失败:", error);
         });
       console.log("获取验证码");
-      this.verified = false;
     },
+    startCountdown() {
+      this.countdown = 60; // 设置倒计时时长
+      this.canSendCode = false; // 禁止再次发送验证码
+      let interval = setInterval(() => {
+        this.countdown--;
+        if (this.countdown <= 0) {
+          clearInterval(interval);
+          this.canSendCode = true; // 重新允许发送验证码
+          this.countdown = 0; // 重置倒计时
+        }
+      }, 1000);
+    },
+
 
     submitRegistration() {
       if (this.registerForm.password !== this.registerForm.confirmPassword) {
@@ -130,9 +145,12 @@ export default {
 <style>
 .el-dialog.register-dialog {
   width: 600px;
-  height: auto; /* 或者指定一个足够大的高度值 */
-  max-height: 80%; /* 防止对话框过高 */
-  overflow-y: auto; /* 允许垂直方向上的滚动 */
+  height: auto;
+  /* 或者指定一个足够大的高度值 */
+  max-height: 80%;
+  /* 防止对话框过高 */
+  overflow-y: auto;
+  /* 允许垂直方向上的滚动 */
   border-radius: 2%;
   backdrop-filter: blur(5px);
   background-color: rgba(255, 255, 255, 0.603);

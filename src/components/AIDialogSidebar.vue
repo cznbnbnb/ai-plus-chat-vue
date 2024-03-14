@@ -21,7 +21,12 @@
 
       <div class="input-area">
         <el-input v-model="inputText" placeholder="输入消息..."></el-input>
-        <el-button type="primary" @click="sendMessage">发送</el-button>
+        <el-button type="primary" @click="() => sendMessage('common')"
+          >发送</el-button
+        >
+        <el-button type="success" @click="() => sendMessage('order')"
+          >发送命令</el-button
+        >
       </div>
     </div>
   </el-drawer>
@@ -29,7 +34,7 @@
 
 <script>
 import axios from "axios";
-
+import { mapState } from "vuex";
 export default {
   data() {
     return {
@@ -41,23 +46,39 @@ export default {
       pollInterval: null,
     };
   },
-  methods: {
-    sendMessage() {
-      const message = this.inputText;
-      this.inputText = ""; // 清空输入框
-      this.aiResponse = ""; // 重置AI回应
-      this.userMessage = message; // 显示用户消息
-      axios
-        .post("/ai/sendMessage", { message: message })
-        .then((response) => {
-          console.log("发送成功:", response.data);
-          this.pollAnswer(); // 开始轮询获取AI回复
-        })
-        .catch((error) => {
-          console.error("发送失败:", error);
-          return;
-        });
+  computed: {
+    ...mapState({
+      friendId(state) {
+      return state.currentChat ? state.currentChat.id.toString() : '';
     },
+    }),
+  },
+  methods: {
+    sendMessage(type) {
+      const message = this.inputText.trim();
+      // 确保即使 friendId 未定义，也能继续执行
+      const contactId = this.friendId ? this.friendId.toString() : "";
+
+      if (message) {
+        this.inputText = ""; // 清空输入框
+        this.aiResponse = ""; // 重置AI回应
+        this.userMessage = message; // 显示用户消息
+        axios
+          .post("/ai/sendMessage", {
+            message: message,
+            type: type,
+            contactId: contactId,
+          })
+          .then((response) => {
+            console.log("发送成功:", response.data);
+            this.pollAnswer(); // 开始轮询获取AI回复
+          })
+          .catch((error) => {
+            console.error("发送失败:", error);
+          });
+      }
+    },
+
     pollAnswer() {
       const poll = () => {
         axios
@@ -65,9 +86,11 @@ export default {
           .then((response) => {
             if (response.data.code === 1) {
               this.failedAttempts = 0; // 重置失败尝试计数器
-              this.aiResponse = response.data.data.answer;
+              if (response.data.data.canDisplay){
+                this.aiResponse = response.data.data.answer;
+              }
               console.log("AI状态:", response.data.data.state);
-              if (response.data.data.state === 2) {
+              if (response.data.data.state === 2&&response.data.data.canDisplay) {
                 this.aiResponse = response.data.data.answer;
                 console.log("AI回复完毕:");
                 // AI回复完毕后停止轮询
